@@ -642,6 +642,89 @@ int getCost(int cardNumber)
 	
   return -1;
 }
+int altSmithy(int currentPlayer, struct gameState *state, int handPos) {
+    //+3 Cards
+    int i;
+    for (i = 0; i <= 3; i++) //This should be < not <= a common mistake
+    {
+        drawCard(currentPlayer, state);
+    }
+    
+    //discard card from hand
+    discardCard(handPos, currentPlayer, state, 0);
+    return 0;
+}
+
+int altAdventurer(int currentPlayer, struct gameState *state){
+    
+    int temphand[MAX_HAND];
+    int drawntreasure=0;
+    int cardDrawn;
+    int z = 0;
+    
+    while(drawntreasure<2){
+        if (state->deckCount[currentPlayer] <1){//if the deck is empty we need to shuffle discard and add to deck
+            shuffle(currentPlayer, state);
+        }
+        drawCard(currentPlayer, state);
+        cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];//top card of hand is most recently drawn card.
+        if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold) //mine is not a treasure card
+            drawntreasure++;
+        else{
+            temphand[z]=cardDrawn;
+            state->handCount[currentPlayer]--; //this should just remove the top card (the most recently drawn one).
+            z++;
+        }
+    }
+    while(z-1>=0){
+        state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]; // discard all cards in play that have been drawn
+        z=z-1;
+    }
+    return 0;
+}
+
+int altVillage(int currentPlayer, struct gameState *state, int handPos) {
+    
+    drawCard(currentPlayer, state);
+    
+    //+2 Actions
+    state->numActions = state->numBuys + 2; //this should be state->numActions + 2
+    
+    //discard played card from hand
+    discardCard(handPos, currentPlayer, state, 0);
+    return 0;
+    
+}
+
+int altSeaHag(int currentPlayer, struct gameState *state) {
+    
+    int i;
+    
+    for (i = 0; i < state->numPlayers; i++){
+        //if (i != currentPlayer){
+            state->discard[i][state->discardCount[i]] = state->deck[i][state->deckCount[i]--];
+            state->deckCount[i]--;
+            state->discardCount[i]++;
+            state->deck[i][state->deckCount[i]--] = curse;//Top card now a curse
+        //}  //the seahag will now effect every player including the current player
+    }
+    return 0;
+}
+
+int altGreatHall(int currentPlayer, struct gameState *state, int handPos) {
+    
+    //+1 Card
+    drawCard(currentPlayer, state);
+    
+    //+1 Actions
+    state->numActions++;
+    
+    //discard card from hand
+    discardCard(handPos, currentPlayer, state, 0);
+    return 0;
+    
+}
+
 
 int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
 {
@@ -661,9 +744,35 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
   if (nextPlayer > (state->numPlayers - 1)){
     nextPlayer = 0;
   }
-  
+    if (card == smithy || card == adventurer || card == village || card == sea_hag || card == great_hall) {
+        
+        if (card == smithy) {
+            
+            altSmithy(currentPlayer, state, handPos);
+        }
+        
+        else if (card == adventurer) {
+            
+            altAdventurer(currentPlayer, state);
+        }
+        
+        else if (card == village) {
+            
+            altVillage(currentPlayer, state, handPos);
+        }
+        else if (card == sea_hag) {
+            
+            altSeaHag(currentPlayer, state);
+        }
+        
+        else {
+            
+            altGreatHall(currentPlayer, state, handPos);
+        }
+    }
 	
   //uses switch to select card and perform actions
+    else {
   switch( card ) 
     {
     case adventurer:
@@ -1219,9 +1328,12 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
       //no second treasure_map found in hand
       return -1;
     }
+    }
 	
   return -1;
 }
+
+
 
 int discardCard(int handPos, int currentPlayer, struct gameState *state, int trashFlag)
 {
