@@ -72,7 +72,7 @@ unittest4: unittest4.c dominion.o rngs.o
 cardtest1: cardtest1.c dominion.o rngs.o
 	gcc -o cardtest1 -g  cardtest1.c dominion.o rngs.o $(CFLAGS)
 
-cardtest1: cardtest2.c dominion.o rngs.o
+cardtest2: cardtest2.c dominion.o rngs.o
 	gcc -o cardtest2 -g  cardtest2.c dominion.o rngs.o $(CFLAGS)
 
 cardtest3: cardtest3.c dominion.o rngs.o
@@ -80,6 +80,15 @@ cardtest3: cardtest3.c dominion.o rngs.o
 
 cardtest4: cardtest4.c dominion.o rngs.o
 	gcc -o cardtest4 -g  cardtest4.c dominion.o rngs.o $(CFLAGS)
+
+randomtestcard1: randomtestcard1.c dominion.o rngs.o
+	gcc -o randomtestcard1 -g  randomtestcard1.c dominion.o rngs.o $(CFLAGS)
+
+randomtestcard2: randomtestcard2.c dominion.o rngs.o
+	gcc -o randomtestcard2 -g  randomtestcard2.c dominion.o rngs.o $(CFLAGS)
+
+randomtestadventurer: randomtestadventurer.c dominion.o rngs.o
+	gcc -o randomtestadventurer -g  randomtestadventurer.c dominion.o rngs.o $(CFLAGS)
 
 unittestresults.out: unittest1.c unittest2.c unittest3.c unittest4.c cardtest1.c cardtest2.c cardtest3.c cardtest4.c dominion.c rngs.c
 	echo "Result for running unit tests:" >  unittestresults.out	
@@ -123,18 +132,22 @@ unittestresults.out: unittest1.c unittest2.c unittest3.c unittest4.c cardtest1.c
 	cardtest4 >>  unittestresults.out
 	gcov -b dominion.c >>  unittestresults.out
 
-testDominion:
-	gcc -fprofile-arcs -ftest-coverage -Wall -std=c99 dominion.c testdominion.c rngs.c -o testdominion -lm -g
+randomtestresults.out: randomtestcard1.c randomtestcard2.c randomtestadventurer.c dominion.c rngs.c
+	echo "Result for running random tests:" &>  randomtestresults.out	
+	echo "randomtestcard1.c:" >> randomtestresults.out
+	gcc -o randomtestcard1 dominion.c rngs.c randomtestcard1.c $(CFLAGS)
+	./randomtestcard1 >>  randomtestresults.out
+	gcov -b dominion.c >> randomtestresults.out
 
-testdom: testDominion
-	./testdominion &> gameResults.out
-	gcov dominion.c >> gameResults.out
-	cat dominion.c.gcov >> gameResults.out
+	echo "randomtestcard2.c:" >> randomtestresults.out
+	gcc -o randomtestcard2 dominion.c rngs.c randomtestcard2.c $(CFLAGS)
+	./randomtestcard2 >>  randomtestresults.out
+	gcov -b dominion.c >>  randomtestresults.out
 
-testdom2: testDominion
-	./testdominion &> gameResults2.out
-	gcov dominion.c >> gameResults2.out
-	cat dominion.c.gcov >> gameResults2.out
+	echo "randomtestadventurer.c:" >> randomtestresults.out
+	gcc -o randomtestadventurer dominion.c rngs.c randomtestadventurer.c $(CFLAGS)
+	./randomtestadventurer >>  randomtestresults.out
+	gcov -b dominion.c >>  randomtestresults.out
 
 completeTestSet: unittest1 unittest2 unittest3 unittest4 cardtest1 cardtest2 cardtest3 cardtest4 testDominion
 	./unittest1 &> ctsResults.out
@@ -149,6 +162,11 @@ completeTestSet: unittest1 unittest2 unittest3 unittest4 cardtest1 cardtest2 car
 	./testdominion >> ctsResults.out
 	gcov dominion.c >> ctsResults.out
 
+completeRandTestSet: randomtestcard1 randomtestcard2 randomtestadventurer
+	./randomtestcard1 &> randResults.out
+	./randomtestcard2 >> randResults.out
+	./randomtestadventurer >> randResults.out
+	gcov dominion.c >> randResults.out
 
 interface.o: interface.h interface.c
 	gcc -c interface.c -g  $(CFLAGS)
@@ -161,8 +179,8 @@ runtests: testDrawCard
 player: player.c interface.o
 	gcc -o player player.c -g  dominion.o rngs.o interface.o $(CFLAGS)
 
-all: playdom player testDrawCard testBuyCard badTestDrawCard
+all: playdom player testDrawCard testBuyCard badTestDrawCard randomtestcard1 randomtestcard2 randomtestadventurer completeRandTestSet randomtestresults.out
 
 clean:
-	rm -f *.o playdom.exe playdom test.exe test dominion testDrawCard badTestDraw player interface rngs unittest1 unittest2 unittest3 unittest4 cardtest1 cardtest2 cardtest3 cardtest4 player.exe testInit testInit.exe *.gcov *.gcda *.gcno *.so
+	rm -f *.o playdom.exe playdom test.exe test dominion testDrawCard badTestDraw player interface rngs randomtestcard1 randomtestcard2 randomtestadventurer unittest1 unittest2 unittest3 unittest4 cardtest1 cardtest2 cardtest3 cardtest4 player.exe testInit testInit.exe *.gcov *.gcda *.gcno *.so
 
