@@ -1,0 +1,6 @@
+Unit Test on isGameOver passed!
+Unit Test on updateCoins passed!
+Unit Test on fullDeckCount passed!
+Unit Test on gainCard passed!
+Great Hall passed the tests!
+SMITHY ASSERT NOT TRUE: Three cards were not added to the player's hand.
